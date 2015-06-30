@@ -2,4 +2,8 @@
 # Files which Git should ignore
 # ---------------------------------------------
 .DS_Store
+*.aux
+*.log
+*.toc
+*.synctex.gz
 

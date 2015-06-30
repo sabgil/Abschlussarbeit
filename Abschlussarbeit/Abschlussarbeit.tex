@@ -88,10 +88,74 @@ Als letztes ist noch SNMPv3, RFC 2272-2275, zu erwähnen, das als Nachfolger von
 \pagebreak
 
 % -----------------------------------------------------------------------------------------------------------------------------------------
+% Netzwer Management
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section*{Netzwerk Management}
+„Netzwerkmanagement beinhaltet die Installation, Integration und Koordination von Hardware, Software und menschlichen Elemente zum Überwachen, Testen, Abfragen, Konfigurieren, Analysieren, Bewerten und Kontrollieren des Netzwerks und seiner Element-Ressourcen, um die Anforderungen in Bezug auf Performance im Betrieb und Dienstqualität zu angemessenen Kosten zu erfüllen.“
+\cite{netmanagement}
+\linebreak
+Netzwerkmanagement bedeutet, alle managebaren Entitäten zu Verwalten und Überwachen. Bei den Entitäten handelt es sich im wesentlichen um Router, Switches, Drucker und Server. Um diese Geräte veralten zu können muss sich ein Management System Informationen über den Status dieser Geräte im Netzwerk beschaffen können. Damit lassen sich die Information, die übers Netzwerk ausgetauscht werden, in zwei Kategorien einteilen. Es werden Nachrichten versandt, die über den Status einer Resource informieren und das Management System muss Kommandos an die Ressourcen senden können. Die Nachrichten über den Status können vom Management System angefordert sein, können aber auch vom Gerät selbst als Warnung bei einer Fehlfunktion verschickt werden. Das Management System kann mit Kommandos an Entitäten reagieren um einer Fehlfunktion entgegen zu wirken.
+Die folgende Abbildung zeigt eine allgemeine Darstellung einer Netzwerkmanagementarchitektur mit ihren Hauptkomponenten. Die verwaltende Einheit als Rechner oder Notebook (NMS) und verwaltete Geräte mit ihren Agenten (A).
+\linebreak
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.5]{Bilder/Netzwerk.png}
+	\caption{Beispiel Netzwerk mit allen Entitäten.}
+\end{figure}
+\linebreak
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Netzwerk Management System
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section*{Network Management Station}
+Eine NMS ist ein Rechner der im selben Netzwerk angesiedelt ist wie die Agenten mit denen es kommuniziert. Auf diesem Rechner läuft eine Software, die dem Administrator das Überwachen und Konfigurieren seiner Geräte im Netzwerk erlaubt. Eine NMS kann auch automatisiert sein und auf Fehlermeldungen der Agenten reagieren.
+\linebreak
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Agent
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section*{Agenten}
+Ein Agent ist ein Softwaremodul, dass auf einem netzwerkfähigem Gerät installiert ist. Diese Software bildet die Schnittstelle zwischen dem Gerät und dem Managementsystem. Ein NMS kann einen Request an den Agenten senden um den Status einer Resource zu erfragen. Der Agent liest die angeforderten Informationen aus seinem Wirt aus. Diese Informationen packt der Agent in einen RequestResponse und antwortet damit dem NMS. Die Eigenschaften eines Gerätes, welches von einem Agenten verwaltet wird, können vom NMS auch verändert werden. Zu den Informationen, die der Agent überwacht und übermitteln kann, gehören Konfigurationsdaten, Statusinformationen und Statistikwerte.
+Kritische Eigenschaften eines Gerätes können vom Agent permanent überwacht werden. Triftet ein Wert einer Überwachten Eigenschaft in einen kritischen Bereich ab, kann das der Agent registrieren. Er reagiert sofort und sendet eine Warnung an das NMS.
+Jeder Agent hat dazu eine Management Information Base (MIB) in der die Werte spezifiziert sind, die er verwalten und überwachen kann. Die Einträge in der MIB verweisen auf die Managed Objects vom Gerät.
+\linebreak
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.7]{Bilder/Agent.png}
+	\caption{EIn Agent und seine Managed Objects aus der MIB}
+\end{figure}
+\linebreak
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Agent
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section*{Management Information Base (MIB)}
+Die Management Information Base (MIB) enthält alle Managed Objects, die ein Agent später referenzierten kann. Die einzelnen Objekte müssen in der MIB detailliert beschrieben werden. Jedes Object erhält seine eigenen Zugriffsrechte, die später für die Anfragen von einem NMS an den Agenten gelten sollen. Damit durch ein NMS gezielt solche Objekte angesprochen werden können, erhalten die Managed Objects eine eindeutige Object ID (OID). Zudem sind zu bestimmen mit welchem Datentype der Status des Objekts anzugeben ist und es es gibt eine Beschreibung für das Objekt in Textform.
+Die Module und Objekte einer MIB sind angeordnet in Baumform und können mit der OID referenziert werden. Ein Identifier zu einem Managed Object im Baum besteht aus Nummern und kann z.B. so aussehen: „.1.3.6.1.2.1.1“. Die Länge der OID bestimmt die Tiefe im Baum. Eine einzelne Nummer gibt Auskunft über das Blatt auf horizontaler Ebene. Die Blätter tragen auch Namen. So kann eine OID auch wie folgt beschrieben werden: „.iso.org.dod.mgmt.mib-2.system.sysDescr.0“.
+Die Managed Objects einer MIB werden in der Syntax, die von der SMI vorgegeben wird, in einer ASCII-Datei abgelegt. Diese Datei kann von einem MIB-Compiler für die Verwendung durch einen Agenten aufbereitet werden.
+\linebreak
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=1]{Bilder/MIB.png}
+	\caption{Die grobe Struktur der MIB}
+\end{figure}
+\linebreak
+
+% -------------
+\pagebreak
+% -----------------------------------------------------------------------------------------------------------------------------------------
 % Literaturverzeichnis
 % -----------------------------------------------------------------------------------------------------------------------------------------
 \begin{thebibliography}{10}
-	\bibitem{history} \url http://www-i4.informatik.rwth-aachen.de/content/teaching/proseminars/sub/2003_ss_proseminar_docs/snmp.pdf
+	\bibitem{history}			% Geschichte
+	\begin{small}
+		www-i4.informatik.rwth-aachen.de/content/teaching/proseminars/sub/2003\_ss\_proseminar\_docs/snmp.pdf
+	\end{small}
+	\bibitem{netmanagement}	% Netzwerk Management
+		Kurose, J. F.,
+		Computernetze: Ein Top-Down-Ansatz mit Schwerpunkt Internet,
+		Addison-Wesley,
+		2002
 \end{thebibliography}
 
 \end{document}
