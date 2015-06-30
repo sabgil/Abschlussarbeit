@@ -6,6 +6,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{color}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \author{Christian Weiß}
 \title{Implementierung und Evaluirung eines SNMP Scanners}
@@ -61,7 +62,7 @@
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % Inhaltsverzeichnis
 % -----------------------------------------------------------------------------------------------------------------------------------------
-%\tableofcontents
+\tableofcontents
 
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % Einleitung (Motivation)
@@ -137,9 +138,91 @@ Die Managed Objects einer MIB werden in der Syntax, die von der SMI vorgegeben w
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=1]{Bilder/MIB.png}
-	\caption{Die grobe Struktur der MIB}
+	\caption{Die grobe Struktur des MIB-Baumes}
+\end{figure}
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Structure of Management Information SMI
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section*{Structure of Management Information (SMI)}
+Die SMI ist eine Sprache zur Beschreibung der MIB’s und wurde für SNMP entwickelt. Damit lassen sich die Module, Managed Objects und Notifications für die MIB erstellen. Die SMI legt dazu die Syntax fest, mit der eine MIB beschrieben werden kann. Außerdem sind verschiedene Datentypen wie INTEGER, Gauge, Counter64 und viele mehr definiert. Ansonsten ist die SMI ein Auszug aus der ASN.1.
+Ein Beispiel für einen MIB-Eintrag in der Form, wie sie von der SMI vorgegeben wird:
+\linebreak
+\color{red}
+neuesObj OBJECT-TYPE\\
+		SYNTAX Ein Datentype aus der ASN.1 oder Abgeleitet.\\
+		ACCESS read-only\\
+		STATUS mandatory\\
+		DESCRIPTION\\
+			„Eine detaillierte Beschreibung dieses Objects“\\
+		::= { internet 7 }\\
+\color{black}
+Damit würde ein Eintrag im Baum entstehen, der  wie folgt zu erreichen ist: iso.org.dod.internet.neuesObj\\
+und als Object Identifier : 1.3.6.1.7.0
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Abstract Syntax Notation One ASN.1
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section*{Abstract Syntax Notation One (ASN.1)}
+Zwischen den verschiedenen Geräten im Netzwerk kann es zu Inkompatibilitäten kommen. Die Hardware oder auch die installierte Software kann für die Daten unterschiedliche Darstellungen verwenden. Ein Beispiel dafür ware Big Endian und Little Endian. Bei der Kommunikation mit SNMP zwischen den Agenten und dem NMS müssen die Daten jedoch klar definiert sein. SNMP setzt für die Kompatibilität auf eine Teilmenge der ASN.1.
+Die ASN.1 bietet einen Standard zur Definition von Datentypen und deren Werte. Ein Datentype ist eine Art von Information. Eine Information kann Beispielsweise eine Zahl, ein Text, ein Bilder oder auch ein Video sein. Für diese Informationen sollen Datentypen bereitgestellt werden. Ein hingegen Wert ist eine Instanz von einem dieser Datentypen. In der ASN.1 sind verschiede primitive Datentypen und deren Werte beschrieben. Außerdem finden sich Regeln um einfache Datentypen zu kombinieren, wodurch man komplexere Typen erzeugt. Es ist ein Werkzeugkasten um Daten in eine bestimmte  Form zu bringen.
+\linebreak
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Basic Encoding Rules BER
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section*{Basic Encoding Rules (BER)}
+\color{red}
+"Follow the Basic Encoding Rules when laying out the bytes of an SNMP message. The most fundamental rule states that each field is encoded in three parts: Type, Length, and Data. Type specifies the data type of the field using a single byte identifier. For a brief table of some data types and their identifiers, see Table 1. Length specifies the length in bytes of the following Data section, and Data is the actual value communicated (the number, string, OID, etc). One way to visualize encoding a field is shown in Figure 1."
+\cite{basicEncodingRules}
+\color{black}
+\linebreak
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=1]{Bilder/BasicEncodingRules}
+	\caption{Darstellung eines Wertes in den Basic Encoding Rules}
+\end{figure}
+
+\subsection*{Der Type}
+Der Datentype wird normalerweise mit einem Byte bestimmt. Doch von diesem Byte sind die 3 höchsten Bit reserviert. So kann es vorkommen, dass der Datentype mit mehreren Bytes beschrieben wird. Mit fünf Bits können nur 31 verschiedene Typen definiert werden.
+\linebreak
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=1]{Bilder/Datentype-BER}
+	\caption{Die Verwendung der einzelnen Bits im Byte Datentype}
 \end{figure}
 \linebreak
+Die Datentypen lassen sich in vier Klassen einteilen. Die Klassen sind Universal, Application, Context-specific und Private. Sie werden in den beiden höchsten Bits 7 und 8 dargestellt.
+\linebreak
+\begin{center}
+	\begin{tabular}{| l | c | c |}
+		\hline
+		Klasse & Bit 8 & Bit 7\\
+		\hline
+		Universal & 0 & 0\\
+		Application & 0 & 1\\
+		Context-specific & 1 & 0\\
+		Private & 1 & 1\\
+		\hline
+	\end{tabular}
+\end{center}
+
+\subsection*{Die Länge}
+Die Länge des Datums kann in drei verschiedenen Varianten auftreten. Sie kann in kurzer oder in langer Form angegeben werden. Beide sind definit. Beide geben die Länge des Datums in Bytes an. Die dritte Form is indefinit. Es wird keine Länge angegeben. Das Ende des Datums wird markiert mit einer „end-of-contents“ Marke. Dazu werden zwei leere Bytes am Ende des Datums angehängt.
+\linebreak
+Die einfachste Form, mit der die Länge eines Datums bestimmt wird, ist definit und ein Byte lang. Dazu muss das höchste Bit im Byte 0 sein. In den restlichen 7 Bits kann die Länge des Datums in Bytes eingetragen werden. Dadurch, dass das höchste Bit 0 sein muss, liegt der Wertebereich nur bei 0 - 127 Bytes.
+\begin{center}
+	\begin{tabular}{| l | l |}
+		\hline
+		Bit 8 & Bit 7-1\\
+		\hline
+		0 & Die Anzahl an Bytes\\
+		\hline
+	\end{tabular}
+\end{center}
+
+\subsection*{Das Datum}
+Das Datum selbst wird byteweise eingetragen, wobei mit dem höchsten Byte begonnen wird. Das niederste Byte komm zuletzt. Die Anzahl der Bytes muss mit der Längenangabe übereinstimmen.
 
 % -------------
 \pagebreak
@@ -156,6 +239,8 @@ Die Managed Objects einer MIB werden in der Syntax, die von der SMI vorgegeben w
 		Computernetze: Ein Top-Down-Ansatz mit Schwerpunkt Internet,
 		Addison-Wesley,
 		2002
+	\bibitem{basicEncodingRules}	% Basic Encoding Rules BER
+		www.rane.com/note161.html
 \end{thebibliography}
 
 \end{document}
