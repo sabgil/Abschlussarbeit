@@ -150,7 +150,7 @@ Die Managed Objects einer MIB werden in der Syntax, die von der SMI vorgegeben w
 % Structure of Management Information SMI
 % -----------------------------------------------------------------------------------------------------------------------------------------
 \section{Structure of Management Information (SMI)}
-Die SMI ist eine Sprache zur Beschreibung der MIB’s und wurde für SNMP entwickelt. Damit lassen sich die Module, Managed Objects und Notifications für die MIB erstellen. Die SMI legt dazu die Syntax fest, mit der eine MIB beschrieben werden kann. Außerdem sind verschiedene Datentypen wie INTEGER, Gauge, Counter64 und viele mehr definiert. Ansonsten ist die SMI ein Auszug aus der ASN.1.
+Die SMI ist eine Sprache zur Beschreibung der MIB’s und wurde für SNMP entwickelt. Damit lassen sich die Module, Managed Objects und Notifications für die MIB erstellen. Die SMI legt dazu die Syntax fest, mit der eine MIB beschrieben werden kann. Außerdem sind verschiedene Datentypen wie INTEGER, Gauge, Counter64 und viele mehr definiert. Die SMI ein für SNMP angepasster Auszug aus der ASN.1.
 Ein Beispiel für einen MIB-Eintrag in der Form, wie sie von der SMI vorgegeben wird:
 \\
 \begin{figure}[h]
@@ -252,23 +252,22 @@ A second goal of the protocol is that the functional paradigm for monitoring and
 A third goal is that the architecture be, as much as possible, independent of the architecture and mechanisms of particular hosts or particular gateways.“
 \cite{rfcSnmpGoals}\\
 \emptyline
-Vom SNMP Protokoll gibt es heute mehrere Versionen. Die erste Version vom Protokoll hatte kaum Sicherheitsmechanismen. Es wurde zu unsicher. Deshalb haben die Entwickler neue Entwürfe heraus gebracht. Die Version 2 von SNMP gibt es in mehreren Ausführungen mit verschiedenen Ansätzen zur Schliessung der Sicherheitslücken. Doch die Umsetzung der Versionen SNMPv2u und SNMPv2p waren den meisten Anwendern zu umständlich, sie fanden kaum Akzeptanz. SNMPv2* wurde erst gar nicht veröffentlicht. Letztendlich verzichtete man auf die Sicherheitsmechanismen und brachte die Version SNMPv2c hervor. Damit wurde die erste Version mit neuen Features der der zweiten Version erweitert. Um dem Verlangen nach Sicherheit doch noch gerächt zu werden, haben die Entwickler noch eine dritte Version aufgelegt, SNMPv3.\\
-Die Architektur besteht aus zwei einfachen Elementen, den Managern und den Agenten. Die Manager werden meist als Network Management Station (NMS) bezeichnet. Die Manager stellen Anfragen an die Agenten um Informationen über deren Gerät im Netzwerk zu erhalten. Sie können aber auch Änderungen an den Einstellungen eines Gerätes vornehmen. So ermöglicht es dem Administrator das zentrale Verwalten seiner Geräte im Netzwerk.
-SNMP ermöglicht die Überwachung von Netzwerkkomponenten, bietet eineFernkonfiguration und Fernsteuerung von Netzwerkkomponenten an. Außerdem gibt es eine Fehlererkennung mit Benachrichtigung. Agenten überwachen sich selbst. Stellen sie eine Fehlfunktion fest, senden sie eine Notifikation an ihre Management Station.\\
-SNMP kann mit verschiedenen Transportprotokollen verwendet werden. Meistens werden die SNMP Pakete jedoch mit UDP versandt.
-Mit SNMP werden Anfragen an ein Gerät im Netzwerk gestellt. Diese Anfragen (Request) können vom Gerät einen Wert als Antwort anfordern. Sie können das Gerät aber auch auffordern einen Wert in dessen Einstellungen zu ändern.\\
+Vom SNMP Protokoll gibt es heute mehrere Versionen. Die erste Version vom Protokoll hatte kaum Sicherheitsmechanismen. Im laufe der Zeit wurde es zu unsicher. Deshalb haben die Entwickler neue Entwürfe heraus gebracht. Die Version 2 von SNMP gibt es in mehreren Ausführungen mit verschiedenen Ansätzen zur Schliessung der Sicherheitslücken. Doch die Umsetzung der Versionen SNMPv2u und SNMPv2p waren den meisten Anwendern zu umständlich und fanden kaum Akzeptanz. Die Variante SNMPsec kam nie zu Einsatz und SNMPv2* wurde erst gar nicht veröffentlicht. Letztendlich verzichtete man auf die Sicherheitsmechanismen und brachte die Version SNMPv2c hervor. Damit wurde die erste Version mit den neuen Features der der zweiten Version erweitert. Um dem Verlangen nach Sicherheit doch noch gerächt zu werden, haben die Entwickler noch eine dritte Version aufgelegt, SNMPv3\\
+Die Architektur besteht aus zwei einfachen Elementen, den Managern und den Agenten. Die Manager werden meist als Network Management Station (NMS) bezeichnet. Sie stellen Anfragen an die Agenten um Informationen über deren Gerät im Netzwerk zu erhalten. Sie können aber auch Änderungen an den Einstellungen eines Gerätes vornehmen. Das ermöglicht dem Administrator das zentrale Verwalten seiner Geräte im Netzwerk.\\
+SNMP ermöglicht die Überwachung von Netzwerkkomponenten, bietet eine Fernkonfiguration und Fernsteuerung von Netzwerkkomponenten an. Außerdem gibt es eine Fehlererkennung mit Benachrichtigung. Agenten überwachen sich selbst, stellen sie dabei eine Fehlfunktion fest, senden sie eine Notifikation an ihre Management Station.\\
+SNMP kann mit verschiedenen Transportprotokollen verwendet werden. Meistens werden die SNMP Pakete jedoch mit UDP versandt. Es können aber auch die Protokolle IPX, AppleTalk und OSI genutzt werde.\\
+Mit SNMP werden Anfragen üder Status an ein Gerät im Netzwerk gestellt. Diese Anfragen (Request) können vom Gerät einen oder mehrere Werte als Antwort anfordern. Sie können das Gerät aber auch auffordern einen Wert in dessen Einstellungen zu ändern. Die Eigenschaften werden über ihren Object Identifier angesprochen und müssen in der MIB des Agents aufgeführt sein.\\
 Wenn ein Request einen Fehler aufweist, also nicht dem Protokoll entspricht, dann ist vom Agent keine Antwort zu erwarten.\\
-Zur Übertragung der Daten werden in allen Versionen die BER verwendet. Das gesamte Paket wird in dieser Form der Codierung geschrieben.
+Zur Übertragung der Daten werden in allen Versionen die Basic Encoding Rules verwendet. Das gesamte Paket wird in dieser Form der Codierung geschrieben.
 \\
 
 % -----------------------------------------------------------------------------------------------------------------------------------------
-% Literaturverzeichnis
+% Protokolaufbau
 % -----------------------------------------------------------------------------------------------------------------------------------------
-\section{Protokollaufbau}
-\subsection{SNMPv1}
+\subsection{SNMPv1 Protokollaufbau}
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=1]{Bilder/SNMPv1-Aufbau}
+	\includegraphics[scale=.8]{Bilder/SNMPv1-Aufbau.png}
 	\caption{Der Protokollaufbau von SNMP Version 1}
 \end{figure}
 Das Paket unterteilt sich im im wesentlichen in zwei Teile. Der Header und die Protocol Data Unit (PDU). Der Header gibt Auskunft über die Länge des gesamten Pakets, die verwendete Protokoll Version und einen Community-Namen. In der PDU sind die zu übertragenden Daten enthalten, sowie eine Fehlermeldung.\\
@@ -276,7 +275,7 @@ Das Paket unterteilt sich im im wesentlichen in zwei Teile. Der Header und die P
 \subsubsection{Header}
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=1]{Bilder/SNMPv1-Header}
+	\includegraphics[scale=1]{Bilder/SNMPv1-Header.png}
 	\caption{Der Header von SNMP Version 1}
 \end{figure}
 Der Inhalt eine SNMP Nachricht besteht aus einer Ansammlung von Daten, einer Sequenz. Der Header beginnt deshalb mit dem ASN.1 Datentype „Sequence“. Die Länge entspricht dem gesamten Paket in Bytes. Der rest des Paketes entspricht dem Wert in diesem TLV-Encoding.
@@ -286,7 +285,7 @@ Die Community dient hier der Sicherheit und ist als eine Art Passwort gedacht. E
 \subsubsection{Protocol Data Unit (PDU)}
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=1]{Bilder/SNMPv1-PDU}
+	\includegraphics[scale=.8]{Bilder/SNMPv1-PDU.png}
 	\caption{Die PDU von SNMP Version 1}
 \end{figure}
 Die PDU hat selbst auch einen Header. Im header wird der Request Type angegeben. Der Request Type ist vom Type IMPLICIT SEQUENCE. Die Typen geben den Zweck der Nachricht an. Zum Auslesen von Konfigurationsdaten sendet man „GetRequest“ oder „GetNextRequest“. Um die Konfiguration an einem Gerät zu ändern, sendet man einen „SetRequest“. Die Geräte antworten mit einem „RequestResponse“. Stellt ein Agent ungewöhnliche Werte an Gerät fest, sendet er eine „Trap“ Nachricht. Als Länge trägt man hier die gesamt Länge der PDU ein. Der rest der PDU entspricht dem Wert im TLV.\\
@@ -295,34 +294,91 @@ Die Request ID ist ein beliebiger zahlen Wert, der die Nachricht eindeutig ident
 Das Error-Feld kann einen von 0 verschiedenen Wert nur dann haben, wenn es sich um eine Antwort oder Benachrichtigung von einem Agent handelt. Mögliche Fehlermeldungen sind:\\
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=1]{Bilder/SNMPv1-Fehler}
+	\includegraphics[scale=.75]{Bilder/SNMPv1-Fehler.png}
 \end{figure}
 In einem SNMP Paket können mehrere Werte abgefragt werden. Dann enthält der PDU-Body mehrere Variablen Bindings. Wenn eine dieser Variablen einen Fehler verursacht, ist die Position dieser Variablen im Feld Error Index hinterlegt.\\
 
 \subsubsection{PDU - Body}
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=1]{Bilder/SNMPv1-PDU-Body}
+	\includegraphics[scale=.8]{Bilder/SNMPv1-PDU-Body.png}
 	\caption{Der Body aus der PDU. Der Teil mit den Variablen.}
 \end{figure}
-Im PDU-Body werden die Werte übertragen. Eine oder mehrere Variablen können in der „VarBindList“ zusammen gefasst werden. Auch hier wird alles TLV-Codiert. Diese Liste der Variablen ist vom Type SEQUENCE. Die einzelnen Variablen bestehen aus einer OID und dem zugehörigem Wert selbst. Die beiden werden ebenso überspannt von einer SEQUENCE, dem „VarBind“.\\
-Der Object Identifier und der dazu gehörigeWert werden ebenfalls im TLV-Encoding eingetragen. Bei einer Anfrage wird nur die OID und kein Wert übertragen, den soll der Agent zurücksenden. Für diesem Fall gibt es den Datentype NULL. Die Länge wird auch auf 0 gesetzt und Daten im Feld ‚value‘ werden keine eingetragen.\\
+Im PDU-Body werden die Werte übertragen, die ausgelesen oder im Gerät gespeichert werden sollen. Die Variablen, es kann auch nur eine einzelne sein, werden in der "VarBindList" zusammen gefasst werden. Diese Liste der Variablen ist vom Type SEQUENCE. Auch hier wird alles TLV-Codiert, wie es in den BER definiert ist. Die einzelnen Variablen bestehen aus der OID des Managed Objects und dem zugehörigem Wert selbst. Die beiden werden ebenso überspannt von einer SEQUENCE, dem „VarBind“.\\
+Der Object Identifier und der dazu gehörigeWert werden ebenfalls im TLV-Encoding eingetragen. Für eine Anfrage zum auslesen des Status einer Eigenschaft aus dem Gerät, soll kein Wert übermittelt werde. Den der Agent soll in seiner Antwort diesen Wert bereitstellen. In diesem Fall sendet man den Datentype NULL. Die Länge wird auch mit 0 angegeben und Daten im Feld ‚value‘ werden keine eingetragen.\\
 
 \subsubsection{Veränderter Header bei Traps}
 Ein Agent kann Teile des System auf dem er läuft selbstständig überwachen, so muss des Management System nicht permanent den Status abfragen. Der Agent kann konfiguriert werden auf bestimmte Werte ein Auge zu haben. Wenn eine dieser Systemeigenschaften eine kritische Marke über- oder unterschreitet, dann sendet der Agent eine Warnung an den Manager. Diese Art von Benachrichtigungen nennt man Traps. Für diese Traps gibt es einen eigenen PDU-Header.\\
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=1]{Bilder/SNMPv1-Header-Traps}
+	\includegraphics[scale=.8]{Bilder/SNMPv1-Header-Traps.png}
 	\caption{Die Unterschiede im Header bei Traps}
 \end{figure}
 Gleich nach dem PDU Type folgt das Feld ‚enterprice‘. Im Feld ‚enterprise‘ ist immer ein Object Identifier zu finden. Er identifiziert die Eigenschaft, deren Wert für diese Warnung sorgte. Der Agent , der diese Nachricht versendet trägt seine IP-Adresse im Feld ‚agent-addr‘ ein. Der Datentype dafür ist festgelegt als NetworkAddress.\\
 Das Feld ‚generic-trap‘ enthält einen Integer und kann folgende vordefinierte Fehler enthalten :\\
 \begin{figure}[h]
 	\centering
-	\includegraphics[scale=1]{Bilder/SNMPv1-Traps-Fehler}
+	\includegraphics[scale=.8]{Bilder/SNMPv1-Traps-Fehler.png}
 \end{figure}
 Das Feld ‚specific-trap‘ wird nur gebraucht, wenn der Fehler nicht einer der generischen Fehlertypen ist. Der Datentype ist als Integer festgelegt. Hier können vom Hersteller oder vom Administrator eigene Fehlertypen eingetragen werden.\\
 Im letzten Feld übermittelt der Agent die Zeit, die seit seinem letzten Neustart vergangen ist. Der Zeitstempel wird angegeben mit dem Datentype TimeTicks.\\
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% SNMPv2
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\subsection{SNMPv2 Allgemein}
+Es gibt mehrere Varianten von dieser SNMP Version. Die gängigste Varante aus der Version 2 des Protokolls is SNMPv2c Community Based. Ansonsten gab es noch SNMPsec, SNMPv2*, Party Based und User Based. „The Party-based SNMPv2 (SNMPv2p), SNMPv2u, and SNMPv2* were either declared Historic circa 1995 or were never on the standards track.“ \cite{rfcSnmpNotUsed}
+\subsubsection{Sicherheit}
+In der Version 2 des Protokolls ging es haupsächlich um die Sicherheit. Der Community-Name als eine Art Passwort ist zu unsicher geworden. Die Konfiguration der Geräte im Netzwerk sollte nicht länger dem Schutz eines solchen Passwortes unterliegen. Deshalb haben die Entwickler sich folgende Ziele gesetzt:
+\begin{description}
+	\item["(1)]
+	The protocol should provide for verification that each received SNMPv2 message has not been modified during its transmission through the network 	in such a way that an unauthorized management operation might result.       
+	\item[\ (2)]
+	The protocol should provide for verification of the identity of the originator of each received SNMPv2 message.
+	\item[\ (3)]
+	The protocol should provide that the apparent time of generation for each received SNMPv2 message is recent.
+	\item[\ (4)]
+	The protocol should provide, when necessary, that the contents of each received SNMPv2 message are protected from disclosure.
+\end{description}
+In addition to the principal goal of supporting secure network management, the design of any SNMPv2 security protocol is also influenced by the following constraints:
+\begin{description}
+	\item[\ (1)]
+	When the requirements of effective management in times of network stress are inconsistent with those of security, the former are preferred.
+	\item[\ (2)]
+	Neither the security protocol nor its underlying security mechanisms should depend upon the ready availability of other network services (e.g., 				Network Time Protocol (NTP) or secret/key management protocols).
+	\item[\ (3)]
+	A security mechanism should entail no changes to the basic SNMP network management philosophy."\ 
+	\cite{rfcSnmpV2Securety}\\
+\end{description}
+
+\subsubsection{Features}
+Außer den Sicherheitsvorkehrungen sind auch ein paar neue Features hinzugekommen. Dazu gehören folgende Nacrichtentypen:
+\begin{itemize}
+	\item 
+		GetBulkRequest\\
+		Dieser Request ermöglicht es dem Benutzer ganze Blocke aus der MIB zu lesen. Am nützlichsten ist GetBulk beim Auslesen von Tabellen. Wenn 				das Antwortpaket die maximale Größe überschreiten würde, dann sendet der Agent soviele Werte, wie er in einem Paket unterbringen kann. Ein 				GetRequest würde ein leeres Paket mit einer Fehlermeldung zurück liefern.
+	\item
+		Inform\\
+		Wie ein auch bei einer Trap informiert der Agent mit einer Inform-Nachricht ein NMS über den Status des Gerätes. Eine Trap wird vom NMS 						angenommen und nicht quittiert.
+	\item
+		SNMPv2-Trap\\
+		Die trap hat kein eigenes Nachrichtenformat mehr, wie in Version 1. Der PDU-Header von einer Trap ist der Gleiche wie von einem GetRequest.
+	\item
+		Erweiterungen in der SMI\\
+		SMIv2 definiert neue Datentypen wie z.B. Counter64. Der MIB wurden Äste hinzugefügt wie z.B. mib-2 und snmpv2.
+	\item
+		Erweitertes Errorhandling\\
+		Die Liste der Fehlermeldungen wurde erweitert.
+\end{itemize}
+
+\section{SNMPv2 Party Based}
+\subsubsection{Party Based}
+In diesem Modell von SNMP haben alle Agenten und Manager eine locale Datenbank, die Local Configuration Database (LCD). Die LCD ist eine Liste in der MIB mit den Parties eines Gerätes, die ein Agent oder Manager bei dieser Variante von SNMP haben muss. Die Parties sind alle Geräte, die der Agent bzw. der Manager kontaktieren darf. Sie legt außerdem fest welche Aktionen ein Agent bzw. Manager durchführen darf (Get, Set, Response, …). Weitere Information, die in der LCD enthalten sind, sind maximale Nachrichtenlänge, Verschlüsselungsverfahren, Athentitätsmechanismus, privates und öffentliches Passwort.\\
+„Durch das sogenannte Party-Konzept wird eine Dreistufigkeit der Management-Hierarchie erreicht, da es nicht mehr nur Agenten und NMS gibt, sondern Node Manager, Lokale Manager und Super-Manager. Das führt für den Anwender wiederum dazu, dass er sich diese Hierarchie genauestens überlegen muss. SNMP2 hat drei verschiedene lokale Datenbanken, nämlich für unterstützte Parties, verwaltete Ressourcen und die Zugriffskontrollvorschriften. Die Formulierung von Zugriffsrechten und Gruppen ist relativ kryptisch. Durch die Notwendigkeit der Prüfung nach Zugehörigkeit zu bestimmten Gruppen, der Einordnung in einen bestimmten Kontext und des Geltungsbereichs der Rechte im Einzelnen ist eine SNMP2-Sendung bzw. ein SNMP2-Empfang zu einer komplexen zusammengesetzten Operation geworden. SNMP2 wurde bislang weder von Herstellern noch von Anwendern akzeptiert. Die Entwicklung wurde eingestellt.“
+\cite{snmpv2PartyBased}\\
+\subsubsection{Authenzität und Vertraulichkeit}
+Auf die Nachrichten wird ein Message Digest Algorithmus angewandt und das Ergebnis wird der Nachricht beigefügt. Zusätzlich kann eine Nachricht zum Versenden verschlüsselt werden. Dafür wird ein symmetrisches Verschlüsselungsverfahren benutzt. Beide verfahren zur Sicherheit sind optional, sie können angewandt werden, sind aber nicht verpflichtend.\\
+
 
 % -------------
 \pagebreak
@@ -341,6 +397,13 @@ Im letzten Feld übermittelt der Agent die Zeit, die seit seinem letzten Neustar
 		2002
 	\bibitem{rfcSnmpGoals}
 		RFC 1157, Goals of the Architecture, Seite 5
+	\bibitem{rfcSnmpNotUsed}
+		RFC 3410, 8.2.  SNMPv1 and SNMPv2 Standardization Status, Seite 21, Absatz 1
+	\bibitem{rfcSnmpV2Securety}
+		RFC 1446, 1.3.  Goals and Constraints, Seite 5
+	\bibitem{snmpv2PartyBased}
+		http://www.comconsult-research.de/snmp-versionen-2-und-3/,
+		ComConsult Research, Das Wissensportal, SNMP Version 2 und 3
 \end{thebibliography}
 
 \end{document}
