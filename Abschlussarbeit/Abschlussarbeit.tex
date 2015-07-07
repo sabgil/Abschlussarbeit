@@ -376,9 +376,29 @@ Außer den Sicherheitsvorkehrungen sind auch ein paar neue Features hinzugekomme
 In diesem Modell von SNMP haben alle Agenten und Manager eine locale Datenbank, die Local Configuration Database (LCD). Die LCD ist eine Liste in der MIB mit den Parties eines Gerätes, die ein Agent oder Manager bei dieser Variante von SNMP haben muss. Die Parties sind alle Geräte, die der Agent bzw. der Manager kontaktieren darf. Sie legt außerdem fest welche Aktionen ein Agent bzw. Manager durchführen darf (Get, Set, Response, …). Weitere Information, die in der LCD enthalten sind, sind maximale Nachrichtenlänge, Verschlüsselungsverfahren, Athentitätsmechanismus, privates und öffentliches Passwort.\\
 „Durch das sogenannte Party-Konzept wird eine Dreistufigkeit der Management-Hierarchie erreicht, da es nicht mehr nur Agenten und NMS gibt, sondern Node Manager, Lokale Manager und Super-Manager. Das führt für den Anwender wiederum dazu, dass er sich diese Hierarchie genauestens überlegen muss. SNMP2 hat drei verschiedene lokale Datenbanken, nämlich für unterstützte Parties, verwaltete Ressourcen und die Zugriffskontrollvorschriften. Die Formulierung von Zugriffsrechten und Gruppen ist relativ kryptisch. Durch die Notwendigkeit der Prüfung nach Zugehörigkeit zu bestimmten Gruppen, der Einordnung in einen bestimmten Kontext und des Geltungsbereichs der Rechte im Einzelnen ist eine SNMP2-Sendung bzw. ein SNMP2-Empfang zu einer komplexen zusammengesetzten Operation geworden. SNMP2 wurde bislang weder von Herstellern noch von Anwendern akzeptiert. Die Entwicklung wurde eingestellt.“
 \cite{snmpv2PartyBased}\\
+
 \subsubsection{Authenzität und Vertraulichkeit}
 Auf die Nachrichten wird ein Message Digest Algorithmus angewandt und das Ergebnis wird der Nachricht beigefügt. Zusätzlich kann eine Nachricht zum Versenden verschlüsselt werden. Dafür wird ein symmetrisches Verschlüsselungsverfahren benutzt. Beide verfahren zur Sicherheit sind optional, sie können angewandt werden, sind aber nicht verpflichtend.\\
 
+\subsubsection{SNMPv2p Protokollaufbau}
+Der Aufbau des Protokolls unterscheidet sich grundlegend von der Vorgängerversion. Hier wurde sehr viel Wert auf Sicherheit gelegt. Der Absender trägt im Feld ‚privDest‘ einen Object Identifier ein und legt sich selbst als Empfänger einer Antwort fest. Durch den Object Identifier kann der Empfänger den Sender identifizieren. Das Paket wird nur bearbeitet, wenn der Absender bekannt ist. Den Rest des Pakets trägt man als OKTET STRING im Feld ‚privData‘ ein. Dieser Teil der Nachricht kann verschlüsselt sein. Wenn die Nachricht verschlüsselt wird, dann muss in der MIB des Empfängers der Schlüssel zum decodieren und das angewandte Verschlüsselungsverfahren eingetragen sein. Zu finden ist beides mit den Object Identifier aus Feld ‚privDist‘. Beide Felder werden eingebetet in eine Sequence, sie gibt die Länge der gesamten Nachricht an.\\
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=1]{Bilder/SNMPv2p-Header-Encode}
+	\caption{SNMPv2 Party Based - Header zum Verschlüsseln der Nachricht.}
+\end{figure}
+Es folgt ein weiterer Header zur Sicherheit. Hier geht es um Authentizität. Es kann ein beliebiger Message Digest Algorithmus eingesetzt werden. Doch auch dieser muss in der MIB des Empfängers unter dem Object Identifier zu finden sein. Der Hashcode, den der Algorithmus erzeugt, wird im Feld ‚authInfo‘ eingetragen. Sollte auf Authentizität verzichtet werden, wird nur ein Octet String mit einer Länge von 0 Bytes eingetragen. Im Feld ‚authData‘ folgt die eigentliche Nachricht mit Header und PDU. Auf diesen Teil soll der Authentizitätsalgorithmus angewandt werden.\\
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=1]{Bilder/SNMPv2p-Header-Authentizitaet}
+	\caption{SNMPv2 Party Based - Header für Authentizität.}
+\end{figure}
+Der eigentliche Header der Nachricht lässt sich mit dem aus der SNMP Version 1 nicht vergleichen. Gekapselt von einer Sequence trägt man hier Object Identifier ein. Das Feld ‚destParty‘ trägt den Object Identifier vom Empfänger dieser Nachricht. Der Absender, auch als Object Identifier, ist eingetragen im Feld ‚srcParty‘. Dann gibt es noch ein Feld ‚context‘, damit soll der Absender den Kontext der Nachricht angeben. Dieser Object Identifier spezifiziert einen Ast oder Teilbaum in dem die Werte zu finden sind, um die es sich in dieser Nachricht handelt. Die PDU bleibt im Vergleich zur Version 1 unverändert.\\
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.8]{Bilder/SNMPv2p-Message}
+	\caption{SNMPv2p Party Based - Die eigentliche Nachricht.}
+\end{figure}
 
 % -------------
 \pagebreak
