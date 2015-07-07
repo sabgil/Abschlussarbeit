@@ -6,12 +6,15 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{colortbl}
 \usepackage{color}
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \author{Christian Weiß}
 \title{Implementierung und Evaluirung eines SNMP Scanners}
 
 \begin{document}
+\renewcommand{\arraystretch}{1.2}
+\definecolor{lgray}{gray}{.8}
 
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % Definitionen
@@ -194,11 +197,21 @@ Man unterscheidet zwischen komplexen und primitiven Datentypen. Primitive Typen 
 \\
 Die Datentypen lassen sich außerdem in vier Klassen einteilen. Die Klassen sind Universal, Application, Context-specific und Private. Sie werden in den beiden höchsten Bits 7 und 8 dargestellt.
 \\
-\begin{figure}[h]
-	\centering
-	\includegraphics[scale=1]{Bilder/datentypeKlassen}
-	\caption{Die verschiedenen Klassen der Datentypen}
-\end{figure}
+\emptyline
+\begin{tabular}{| l | c | c |}
+	\hline
+	\rowcolor{lgray}
+	Klasse					&		Bit 8		& Bit 7\\
+	\hline
+	Universal				&			0		&	0\\
+	\hline
+	Application			&			0		&	1\\
+	\hline
+	Context-specific	&			1		&	0\\
+	\hline
+	Private					&			1		&	1\\
+	\hline
+\end{tabular}
 
 \subsection{Die Länge}
 Die Länge des Datums kann in drei verschiedenen Varianten auftreten. Sie kann in kurzer oder in langer Form angegeben werden. Beide sind definit. Die dritte Form is indefinit. Es wird keine Länge angegeben.
@@ -292,10 +305,31 @@ Die PDU hat selbst auch einen Header. Im header wird der Request Type angegeben.
 Außerdem enthält der Header eine Request ID, einen Fehlerwert und die Position des Fehlers. Jeder dieser Werte wird als TLV eingetragen.
 Die Request ID ist ein beliebiger zahlen Wert, der die Nachricht eindeutig identifiziert.
 Das Error-Feld kann einen von 0 verschiedenen Wert nur dann haben, wenn es sich um eine Antwort oder Benachrichtigung von einem Agent handelt. Mögliche Fehlermeldungen sind:\\
-\begin{figure}[h]
-	\centering
-	\includegraphics[scale=.75]{Bilder/SNMPv1-Fehler.png}
-\end{figure}
+%\begin{figure}[h]
+%	\centering
+%	\includegraphics[scale=.75]{Bilder/SNMPv1-Fehler.png}
+%\end{figure}
+\emptyline
+\begin{tabular}{| l | l |}
+	\hline
+	\rowcolor{lgray}
+	Fehler				& Beschreibung\\
+	\hline
+	noError				& Kein Fehler aufgetreten.\\
+	\hline
+	noSuchName	&	Dieses Managed Object gibt es nicht.\\
+	\hline
+	tooBig				&	Das SNMP Paket ist zu groß. Es kann nicht bearbeitet werden.\\
+	\hline
+	genError			&	Der Wert kann entweder  nicht ausgelesen oder nicht eingetragen werden.\\
+	\hline
+	badValue			&	Der Wert entspricht nicht den Bestimmungen. ASN.1\\
+	\hline
+	read-only			&	Der Wert, der geändert werden soll, ist schreibgeschützt.\\
+	\hline
+\end{tabular}
+\\
+\emptyline
 In einem SNMP Paket können mehrere Werte abgefragt werden. Dann enthält der PDU-Body mehrere Variablen Bindings. Wenn eine dieser Variablen einen Fehler verursacht, ist die Position dieser Variablen im Feld Error Index hinterlegt.\\
 
 \subsubsection{PDU - Body}
@@ -314,12 +348,36 @@ Ein Agent kann Teile des System auf dem er läuft selbstständig überwachen, so
 	\includegraphics[scale=.8]{Bilder/SNMPv1-Header-Traps.png}
 	\caption{Die Unterschiede im Header bei Traps}
 \end{figure}
-Gleich nach dem PDU Type folgt das Feld ‚enterprice‘. Im Feld ‚enterprise‘ ist immer ein Object Identifier zu finden. Er identifiziert die Eigenschaft, deren Wert für diese Warnung sorgte. Der Agent , der diese Nachricht versendet trägt seine IP-Adresse im Feld ‚agent-addr‘ ein. Der Datentype dafür ist festgelegt als NetworkAddress.\\
+Gleich nach dem PDU Type folgt das Feld ‚enterprice‘. Im Feld ‚enterprise‘ ist immer ein Object Identifier zu finden. Er identifiziert die Eigenschaft, deren Wert für diese Warnung sorgte. Der Agent, der diese Nachricht versendet trägt seine IP-Adresse im Feld ‚agent-addr‘ ein. Der Datentype dafür ist festgelegt als NetworkAddress.\\
 Das Feld ‚generic-trap‘ enthält einen Integer und kann folgende vordefinierte Fehler enthalten :\\
-\begin{figure}[h]
-	\centering
-	\includegraphics[scale=.8]{Bilder/SNMPv1-Traps-Fehler.png}
-\end{figure}
+%\begin{figure}[h]
+%	\centering
+%	\includegraphics[scale=.8]{Bilder/SNMPv1-Traps-Fehler.png}
+%\end{figure}
+\begin{tabular}{| c | l | l |}
+	\hline
+	\rowcolor{lgray}
+		& Fehler	&	Beschreibung\\
+	\hline
+	0	& coldStart						&	Der Agent initialisiert sich neu. Davon ist seine Konfiguration oder die\\
+		&										&	Protokoll implementation betroffen.\\
+	\hline
+	1	& warmStart						&	Der Agent initialisiert sich neu. Seine Einstellungen bleiben gleich.\\
+	\hline
+	2	&	linkDOwn						&	Ein vom Agent überwachtes Netwerkinterface ist ausgefallen.\\
+	\hline
+	3	&	linkUp							&	Ein vom Agent überwachtes Netwerkinterface ist wieder online.\\
+	\hline
+	4	&	authenticationFalure	&	Ein empfangener Request konnte nicht Authentifiziert werden.\\
+	\hline
+	5	&	egpNeighborsLoss		&	Ein EGP Nachbar ist ausgefallen.\\
+	\hline
+	6	&	enterpriseSpecific			&	Ein Firmen spezifischer Fehler ist aufgetreten. Er ist im Feld ‚specific-trap‘\\
+		&										&	zu finden.\\
+	\hline
+\end{tabular}
+\emptyline
+
 Das Feld ‚specific-trap‘ wird nur gebraucht, wenn der Fehler nicht einer der generischen Fehlertypen ist. Der Datentype ist als Integer festgelegt. Hier können vom Hersteller oder vom Administrator eigene Fehlertypen eingetragen werden.\\
 Im letzten Feld übermittelt der Agent die Zeit, die seit seinem letzten Neustart vergangen ist. Der Zeitstempel wird angegeben mit dem Datentype TimeTicks.\\
 
@@ -351,8 +409,11 @@ In addition to the principal goal of supporting secure network management, the d
 	\cite{rfcSnmpV2Securety}\\
 \end{description}
 
+\subsubsection{Authenzität und Vertraulichkeit}
+Auf die Nachrichten wird ein Message Digest Algorithmus angewandt und das Ergebnis wird der Nachricht beigefügt. Zusätzlich kann eine Nachricht zum Versenden verschlüsselt werden. Dafür wird ein symmetrisches Verschlüsselungsverfahren benutzt. Beide verfahren zur Sicherheit sind optional, sie können angewandt werden, sind aber nicht verpflichtend.\\
+
 \subsubsection{Features}
-Außer den Sicherheitsvorkehrungen sind auch ein paar neue Features hinzugekommen. Dazu gehören folgende Nacrichtentypen:
+Außer den Sicherheitsvorkehrungen sind auch ein paar neue Features hinzugekommen. Dazu gehören folgende Nacrichtentypen und sonstige Erweiterungen:
 \begin{itemize}
 	\item 
 		GetBulkRequest\\
@@ -371,16 +432,15 @@ Außer den Sicherheitsvorkehrungen sind auch ein paar neue Features hinzugekomme
 		Die Liste der Fehlermeldungen wurde erweitert.
 \end{itemize}
 
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% SNMPv2	Party Based
+% -----------------------------------------------------------------------------------------------------------------------------------------
 \section{SNMPv2 Party Based}
-\subsubsection{Party Based}
 In diesem Modell von SNMP haben alle Agenten und Manager eine locale Datenbank, die Local Configuration Database (LCD). Die LCD ist eine Liste in der MIB mit den Parties eines Gerätes, die ein Agent oder Manager bei dieser Variante von SNMP haben muss. Die Parties sind alle Geräte, die der Agent bzw. der Manager kontaktieren darf. Sie legt außerdem fest welche Aktionen ein Agent bzw. Manager durchführen darf (Get, Set, Response, …). Weitere Information, die in der LCD enthalten sind, sind maximale Nachrichtenlänge, Verschlüsselungsverfahren, Athentitätsmechanismus, privates und öffentliches Passwort.\\
 „Durch das sogenannte Party-Konzept wird eine Dreistufigkeit der Management-Hierarchie erreicht, da es nicht mehr nur Agenten und NMS gibt, sondern Node Manager, Lokale Manager und Super-Manager. Das führt für den Anwender wiederum dazu, dass er sich diese Hierarchie genauestens überlegen muss. SNMP2 hat drei verschiedene lokale Datenbanken, nämlich für unterstützte Parties, verwaltete Ressourcen und die Zugriffskontrollvorschriften. Die Formulierung von Zugriffsrechten und Gruppen ist relativ kryptisch. Durch die Notwendigkeit der Prüfung nach Zugehörigkeit zu bestimmten Gruppen, der Einordnung in einen bestimmten Kontext und des Geltungsbereichs der Rechte im Einzelnen ist eine SNMP2-Sendung bzw. ein SNMP2-Empfang zu einer komplexen zusammengesetzten Operation geworden. SNMP2 wurde bislang weder von Herstellern noch von Anwendern akzeptiert. Die Entwicklung wurde eingestellt.“
 \cite{snmpv2PartyBased}\\
 
-\subsubsection{Authenzität und Vertraulichkeit}
-Auf die Nachrichten wird ein Message Digest Algorithmus angewandt und das Ergebnis wird der Nachricht beigefügt. Zusätzlich kann eine Nachricht zum Versenden verschlüsselt werden. Dafür wird ein symmetrisches Verschlüsselungsverfahren benutzt. Beide verfahren zur Sicherheit sind optional, sie können angewandt werden, sind aber nicht verpflichtend.\\
-
-\subsubsection{SNMPv2p Protokollaufbau}
+\subsection{SNMPv2p Protokollaufbau}
 Der Aufbau des Protokolls unterscheidet sich grundlegend von der Vorgängerversion. Hier wurde sehr viel Wert auf Sicherheit gelegt. Der Absender trägt im Feld ‚privDest‘ einen Object Identifier ein und legt sich selbst als Empfänger einer Antwort fest. Durch den Object Identifier kann der Empfänger den Sender identifizieren. Das Paket wird nur bearbeitet, wenn der Absender bekannt ist. Den Rest des Pakets trägt man als OKTET STRING im Feld ‚privData‘ ein. Dieser Teil der Nachricht kann verschlüsselt sein. Wenn die Nachricht verschlüsselt wird, dann muss in der MIB des Empfängers der Schlüssel zum decodieren und das angewandte Verschlüsselungsverfahren eingetragen sein. Zu finden ist beides mit den Object Identifier aus Feld ‚privDist‘. Beide Felder werden eingebetet in eine Sequence, sie gibt die Länge der gesamten Nachricht an.\\
 \begin{figure}[h]
 	\centering
@@ -399,6 +459,86 @@ Der eigentliche Header der Nachricht lässt sich mit dem aus der SNMP Version 1 
 	\includegraphics[scale=.8]{Bilder/SNMPv2p-Message}
 	\caption{SNMPv2p Party Based - Die eigentliche Nachricht.}
 \end{figure}
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% SNMPv2	User Based
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section{SNMPv2 User Based}
+\subsection{Datenbank mit User-Informationen}
+Zur Sicherheitsstrategie der User Based Version gehört es, dass alle Benutzer, die auf Geräte zugreifen möchten, in einer Local Configuration Database (LCD) aufgeführt sind. Jedes Gerät hat eine LCD in seiner MIB.
+Der Inhalt der LCD ist im wesentlichen :\\
+\begin{itemize}
+	\item{Benutzername (Octet String)}
+	\item{Authentication Protocol (z.B. MD5)}
+	\item{Privater Schlüssel des Benutzers für den Message Digest Algorithmus}
+	\item{Verschlüsselungsprotokoll (symmetrische Verschlüsselung)}
+	\item{Privater Schlüssel des Benutzers zur Verschlüsselung}
+\end{itemize}
+\textbf{Discovery}
+„This security model requires that a discovery process obtain sufficient information about an SNMPv2 entity's agent in order to communicate with it.  Discovery requires the SNMPv2 manager to learn the agent's agentID value before communication may proceed. This may be accomplished by formulating a get-request communication with the qoS set to noAuth/noPriv, the userName set to "public", the agentID set to all zeros (binary), the contextSelector set to "", and the VarBindList left empty.  The response to this message will be an reportPDU that contains the agentID within the <parameters> field (and containing the usecStatsUnknownContexts counter in the VarBindList). If authenticated communication is required then the discovery process may invoke the procedure described in Section 2.7 to synchronize the clocks.“
+\cite{rfcDiscoveryAgent}
+
+\subsection{SNMPv2u Protokollaufbau}
+Der Protokollaufbau von Version 2 user-based sieht dem, der Version 1 sehr ähnlich. Das Feld für Community im header wurde ersetzt durch ‚Parameter‘. Ein weiterer Unterschied zeigt sich im Bezug auf die PDU. Die PDU wird hier als Octet String eingetragen, nicht als Sequence wie es in den anderen Versionen üblich ist. Das hat den Vorteil, dass die PDU nun verschlüsselt werden kann. Bleibt die PDU umverschlüsselt, dann wird sie dem Nachrichten-Header als Sequence mit entsprechendem Type angehängt, wie es aus der Version 1 bekannt ist.\\
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.8]{Bilder/SNMPv2u-Protokollaufbau}
+	\caption{SNMPv2 User Based Protokollaufbau}
+\end{figure}
+\textbf{Parameter}\\
+Das Feld 'parameter' soll als Octet String eingetragen werden. In diesem Octet String sollen allle Angaben aus der folgenden Tabelle enthalten sein.\\
+\emptyline
+\begin{tabular}{| l | c | l |}
+	\hline
+	\rowcolor{lgray}
+	Parameter			& Octets	&		Beschreibung\\
+	\hline
+	model					&		1		&		Es gibt nur ein Model. Es kann aber ein anderes Model\\
+								&				&		implementiert werden.\\
+	\hline
+	QoS						&		1		&		Zur Auswahl steht :\\
+								&				&		\ - no authentication nor privacy\\
+								&				&		\ - authentication, no privacy\\
+								&				&		\ - authentication and privacy\\
+								&				&		\ - generation of report PDU allowed\\
+	\hline
+	agentID				&		12	&		Ein Object Identifier, der den Absender identifiziert.\\
+	\hline
+	agentBoots			&		4		&		Eine vorzeichenlose Zahl, die angibt, wie oft der Agent\\
+								&				&		gestartet wurde.\\
+	\hline
+	agentTime			&		4		&		Eine vorzeichenlose Zahl, die angibt, wie lange der Agent\\
+								&				&		seit dem letzten Neustart \\
+	\hline
+	maxSize				&				&		Eine vorzeichenlose Zahl, die angibt, wie groß ein\\
+								&				&		Antwortpaket sein darf.\\
+	\hline
+	userLength			&		1		&		Die länge des Usernamens. Max. 16 Octets.\\
+	\hline
+	userName				& x(1 - 16)&	Die einzelnen Zeichen des Usernamens. In der zuvor\\
+								&				&		angegebenen Anzahl.\\
+	\hline
+	authLength			&		1		&		Die Länge des Wertes aus dem Message-Digest-Algorythmus.\\
+	\hline
+	authDigest			&x(0 - 255)&	Des Ergebnis vom Messge-Digest-Algorythmus, der auf die\\
+								&				&		Nachricht angewandt wurde.\\
+	\hline
+	contextSelector	&x(0 - 40)&		Ein Ast oder Teilbaum in der MIB. Der Kontext um den es\\
+								&				&		sich in der Nachricht dreht.\\
+	\hline
+\end{tabular}
+\\
+\emptyline
+
+\textbf{Authentizität}\\
+Für die Authentizität soll zunächst der Username in den Parametern eingetragen werden. Danach lässt man sich vom Massage Digest Algorithmus einen Hascode aus der ganzen Nachricht erzeugen. Anschließend ersetzt man den Username in den Parametern mit dem eben erzeugtem Hashcode.\\
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Literaturverzeichnis
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section{SNMPv2 Community}
+Nachdem die ersten Entwürfe von SNMPv2 zu umständlich und kompliziert waren, fanden sie keine Akzeptanz bei den Anwendern. Party Based und User Based SNMP kammen kaum zum Einsatz. Aus diesem Grund ging die Entwicklung wieder zurück zur Version 1. Für die Sicherheit hat man sich wieder auf einen Community-Namen als Passwort beschränkt. Damit ist SNMPv2c identisch mit der Verson 1. Der einzige Unterschied sind die Erweiterungen der Version 2 des Protokolls wie z.B. neue PDU Typen, kein Trap-Header und eine Erweiterte SMI.\\
+
 
 % -------------
 \pagebreak
@@ -424,6 +564,8 @@ Der eigentliche Header der Nachricht lässt sich mit dem aus der SNMP Version 1 
 	\bibitem{snmpv2PartyBased}
 		http://www.comconsult-research.de/snmp-versionen-2-und-3/,
 		ComConsult Research, Das Wissensportal, SNMP Version 2 und 3
+	\bibitem{rfcDiscoveryAgent}
+		RFC 1910, 4. Discovery, Seite 30
 \end{thebibliography}
 
 \end{document}
