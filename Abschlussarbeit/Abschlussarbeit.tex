@@ -143,6 +143,11 @@ Die Management Information Base (MIB) enthält alle Managed Objects, die ein Age
 Die Module und Objekte einer MIB sind angeordnet in Baumform und können mit der OID referenziert werden. Ein Identifier zu einem Managed Object im Baum besteht aus Nummern und kann z.B. so aussehen: „.1.3.6.1.2.1.1“. Die Länge der OID bestimmt die Tiefe im Baum. Eine einzelne Nummer gibt Auskunft über das Blatt auf horizontaler Ebene. Die Blätter tragen auch Namen. So kann eine OID auch wie folgt beschrieben werden: „.iso.org.dod.mgmt.mib-2.system.sysDescr.0“.\\
 Die Managed Objects einer MIB werden in der Syntax, die von der SMI vorgegeben wird, in einer ASCII-Datei abgelegt. Diese Datei kann von einem MIB-Compiler für die Verwendung durch einen Agenten aufbereitet werden.
 \\
+% toDo:
+% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+% Verschiedene Typen der Einträge : 		Scalar, Table, Spalte, Reihe
+% (Netconf für SNMP Entwickler)
+% ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=1]{Bilder/MIB.png}
@@ -534,14 +539,192 @@ Das Feld 'parameter' soll als Octet String eingetragen werden. In diesem Octet S
 Für die Authentizität soll zunächst der Username in den Parametern eingetragen werden. Danach lässt man sich vom Massage Digest Algorithmus einen Hascode aus der ganzen Nachricht erzeugen. Anschließend ersetzt man den Username in den Parametern mit dem eben erzeugtem Hashcode.\\
 
 % -----------------------------------------------------------------------------------------------------------------------------------------
-% Literaturverzeichnis
+% SNMPv2 Community
 % -----------------------------------------------------------------------------------------------------------------------------------------
 \section{SNMPv2 Community}
 Nachdem die ersten Entwürfe von SNMPv2 zu umständlich und kompliziert waren, fanden sie keine Akzeptanz bei den Anwendern. Party Based und User Based SNMP kammen kaum zum Einsatz. Aus diesem Grund ging die Entwicklung wieder zurück zur Version 1. Für die Sicherheit hat man sich wieder auf einen Community-Namen als Passwort beschränkt. Damit ist SNMPv2c identisch mit der Verson 1. Der einzige Unterschied sind die Erweiterungen der Version 2 des Protokolls wie z.B. neue PDU Typen, kein Trap-Header und eine Erweiterte SMI.\\
 
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% SNMPv3
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section{SNMPv3}
+In der 3.Version von SNMP wurde nicht nur ein Protokoll beschrieben, sondern auch wie ein Agent oder NMS aufgebaut sein soll. Eine SNMP Entität bekommt eine Engine mit diversen Modulen. Sie enthält Applikationen zum Generieren von Nachrichten. Außerdem enthält die Engine ein Message Processing Subsystem, Security Subsystem und einen Dispatcher.
+\subsection{Engine}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.6]{Bilder/SNMPv3-Engine-Agent.png}
+	\caption{Die Engine eines SNMPv3 Agenten}
+\end{figure}
+
+\subsubsection{Dispatcher}
+"There is only one Dispatcher in an SNMP engine.  It allows for concurrent support of multiple versions of SNMP messages in the SNMP engine. It does so by:
+\begin{itemize}
+	\item sending and receiving SNMP messages to/from the network,
+	\item determining the version of an SNMP message and interacting with the corresponding Message Processing Model,
+    \item providing an abstract interface to SNMP applications for delivery of a PDU to an application.
+     \item providing an abstract interface for SNMP applications that allows them to send a PDU to a remote SNMP entity." \cite{rfcSnmpv3EngineDispatcher}
+\end{itemize}
+
+\subsubsection{Message Processing Subsystem}
+"The Message Processing Subsystem is responsible for preparing messages for sending, and extracting data from received messages. Each Message Processing Model defines the format of a particular version of an SNMP message and coordinates the preparation and extraction of each such version-specific message format."
+\cite{rfcSnmpv3EngineMPS}
+„For incoming messages, a version-specific message processing module provides these values to the Dispatcher. For outgoing messages, an application provides these values to the Dispatcher.\\
+For some version-specific processing, the values may be extracted from received messages; for other versions, the values may be determined by algorithm, or by an implementation-defined mechanism. The mechanism by which the value is determined is irrelevant to the Dispatcher.\\
+The following additional or expanded definitions are for use within the Dispatcher.“
+\cite{rfcSnmpEngineMPS2}
+
+\subsubsection{Security Subsystem}
+"The Security Subsystem provides security services such as the authentication and privacy of messages and potentially contains multiple Security Models."
+\cite{rfcSnmpv3EngineSecurity}
+Im Security Subsystem können mehrere Modelle implementiert sein. Als Standard ist das User-Based Security Model enthalten. Dieses Model bedient sich eines Keyed-Hash Message Authentication Code zur Gewährleistung der Authentizität und Integrität der übertragenen Daten.\\
+Um auch für Vertraulichkeit zu sorgen, verwendet das User-Based Model einen Data Encryption Standard (DES) (in the cipher block chaining mode CBC) zur Verschlüsselung der Nachrichten. Die Verschlüsselung ist optional.\\
+Im Protokoll-Header gibt es einen Abschnitt mit 'securityParameter'. Diese Paramerter sind abhängig vom Security Model und werden deshalb vom Security Subsystem eingetragen.
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.58]{Bilder/SNMPv3-Header-SecParam.png}
+	\caption{DIe 'Security Parameter' vom SNMPv3 Protokoll}
+\end{figure}
+
+\subsubsection{Access Control Subsystem}
+"The Access Control Subsystem provides authorization services by means of one or more (*) Access Control Models. An Access Control Model defines a particular access decision function in order to support decisions regarding access rights."
+\cite{rfcSnmpv3EngineACS} \\
+Das Access Control Subsystem von einer SNMP Engine ist Verantwortlich für die Zugriffsberechtigungen auf die Managed Objects. Das Subsystem kann mehrere Modelle für Access Control habem. Der Standard ist das View-Based Access Control Model (VCAM). Die User können eingeschränkte Rechte auf bestimmte Instanzen von Objekten haben. die Zugriffsrechte werden in einer Local Configuration Database geklärt. Jedes SNMP Entity hat seine LCD in der MIB. In der LCD können durch einen Object Identifier, den Context-Namen, die Zugriffsrechte für eine Anfrage von einem Manager gelesen werden. In der LCD sind Einträge, Bereiche oder Teilbäume der MIB angegeben und mit den jeweiligen Zugriffsrechten versehen.\\
+Die Zugriffsrechte auf Bereiche in der MIB:
+\begin{itemize}
+	\item Read-View
+	\item Write-View
+	\item Notify-View
+\end{itemize}
+
+\subsubsection{Applikationen}
+Die Engine kann Verschiedene Applikationen enhalten:
+\begin{itemize}
+	\item Command Generator, zum Erstellen von Requests an den Agenten eines Gerätes im Netzwerk
+	\item Command Responder, liest die vom NMS angeforderten Daten aus der MIB und generiert die Antwort.
+	\item Notification Originator, erzeugt eine Benachrichtigung an das NMS bei kritischen Werten
+	\item Notification Receiver, bearbeitet eingehende Notifikationen
+	\item Proxy Forwarder, leitet Nachrichten weiter an eine andere Entität im Netzwerk
+\end{itemize}
+
+\subsection{SNMPv3 Protokollaufbau}
+\subsubsection{Protokoll - Header}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.8]{Bilder/SNMPv3-Header.png}
+	\caption{Der Header des SNMPv3 Protokolls}
+\end{figure}
+Das Paket beginnt wie immer mit einer Sequence, die sich über die ganze Nachricht erstreckt und damit die Paketlänge angibt. Die Version muss hier mit 3 (SNMPv3) angegeben werden.\\
+Im Feld ‚HeaderData‘ ist eine Sequence eingebetet, die ich nachfolgen separat beschreibe.\\
+Die Security-Parameter werden an das ausgewählte Security-Model in der Engine übergeben. Die werte in diesem Feld sind abhängig von der Implementierung des Security-Models.
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.8]{Bilder/SNMPv3-Header-Data}
+	\caption{Der Ausschnitt 'HeaderData' aus dem Protokoll-Header}
+\end{figure}
+Jede Nachricht erhält eine ID, so können z.B. Requests und Responses einander zugeordnet werden. Dieses vorgehen ist bereits bekannt aus den Vorgängerversionen des Protokolls.
+Der Sender gibt an, wie groß eine Antwort maximal sein darf, damit er sie bearbeiten kann.
+Flags werden in einem Byte (OCTED) angegeben. Durch das Setzen der entsprechenden Bits, kann die verwendete Sicherheit angegeben werden. Zur Wahl stehen Authentifizierung und Verschlüsselung. Außerdem kann für bestimmte Fälle eine Antwort vom Empfänger erzwungen werden.\\
+Als letzter Wert im Header wird ein, von der Engine des Empfängers unterstütztes, Security-Model gewählt.\\
+\emptyline
+Die Message Flags, mit denen bestimmt wird welche Sicherheitsmechanismen zum Einsatz kommen.
+\begin{tabular}{| l | l |}
+	\hline
+	\rowcolor{lgray}
+	messageFlag			&			Bit im Octed\\
+	\hline
+	authFlag					&			0000 0001\\
+	\hline
+	privFlag					&			0000 0010\\
+	\hline
+	reportableFlag			&			0000 0100\\
+	\hline
+\end{tabular}
+\emptyline
+Wenn eine Nachricht verschlüsselt ist, also das ‚privFlag‘ gesetzt wurde, dann muss auch eine Authentifizierung erfolgen. Das ‚privFlag‘ darf nicht ohne das ‚authFlag‘ gesetzt sein.
+
+\subsubsection{Protocol Data Unit}
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.8]{Bilder/SNMPv3-PDU.png}
+	\caption{Die Protocol Data Unit im SNMPv3 Protokoll}
+\end{figure}
+Dieses Feld kann verschlüsselt oder unverschlossen übertragen werden. Ist das ‚privFlag‘ gesetzt, dann muss dieses Feld verschlüsselt werden. Es wird dann von einem OCTED STRING gekapselt, in dem byteweise der verschlüsselte Inhalt eingetragen wird.
+Ansonsten wird der Octed String weggelassen und die PDU beginnt mit einer Sequence.\\
+Die Engine ID wird angegeben in Verbindung mit dem PDU Type. Dadurch kann die Applikation der Engine bestimmt werden, welche die PDU bearbeiten soll.\\
+Der Context-Name in Verbindung mit der Engine ID soll Aufschluss geben über die Managed Informations, die durch die PDU angefragt werden. Ein Context-Name kann in der LCD eines SNMP Entity’s nachgeschlagen werden, um die Zugriffsrechte zu ermitteln.
+Die PDU selbst unterscheidet sich nicht von der in SNMP Version 1.\\
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Measurement
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section{SNMP Scanner}
+\subsection{Vorgehensweise}
+Die beste Methode alle SNMP-fähigen Geräte zu finden, wäre ein Portscan. Um in einem Subnetz nach Geräten zu suchen, die den Port 161 offen haben, müsste man ICMP-Nachrichten verschicken. Am besten such man zunächst nach allen Geräten im Netzwerk und sendet anschließend an jedes Gerät ein UPD Paket auf Port 161. Aus den ICMP Antworten kann sehr genau abgeleitet werden, an welcher Adresse ein SNMP Agent sitzt. Ein SNMP Agent würde eine Nachricht nur beantworten, wenn es ein korrektes SNMP Paket ist. Zum versenden von ICMP-Nachrichten sind administrative Rechte nötig. Die Anwendung verfügt jedoch nur über normale Benutzerrechte. Aus diesem Grund versendet der Scanner SNMP-Nachrichten und sammelt die Antworten.\\
+Einige Versionen des Protokolls haben Sicherheitsmechanismen, die mir das Aufspüren dieser Geräte unmöglich machen. Ohne die Sicherheitsmechanismen zu hintergehen, kann ich nur Gräte finden, die mit den Versionen 1 und 2 Community-Based arbeiten.\\
+Der Scanner kann auf zwei verschiedene Arten eingesetzt werden. Es kann ein automatischer Scan ausgelöst werden. Oder er kann vom Benutzer über die graphische Oberfläche gestartet werden.\\
+Für den Scanner wird als Basisklasse ein QUdpSocket verwendet. Sehr viele SNMP Agenten arbeiten mit der Version 2c. Um dem Protokoll gerecht zu werden, reicht ein UDP Paket an dem Agent.\\
+
+\subsection{Der automatische Scan}
+Der Scanner muss zunächst konfiguriert werden. Er benötigt eine Liste an Community Namen und die zu verwendende Version des Protokolls, die im Paket an den Agent eingetragen werden. Weil UDP kein zuverlässiges Protokoll ist, kann außerdem ausgewählt werden, wie oft ein Paket an den Empfänger gesendet werden soll. Diese Werte zur Konfiguration kommen von einem Server und werden vor dem Start des Scanners von der ‚prepare()‘ Methode gesetzt.\\
+Die zu durchsuchenden Subnetze kann der Scanner selbstständig finden. Es werden alle Netzwerkadapter geprüft, ob sie online sind und eine IPv4 Adresse verwenden. Alle Adapter, für die diese Bedingungen zutreffen, werden in einer Liste abgelegt.\\
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.6]{Bilder/SchemaScanner.png}
+	\caption{Das grobe Ablaufschema des Scanners}
+\end{figure}
+Die Abbildung zeigt den Ablauf beim suchen nach Geräten im Subnetz. Von jedem Adapter, der online ist, wird der IP Adressenbereich vom Subnetz errechnet. Mit jedem in der Liste enthaltenem Community-Namen wird wenigstens ein Datenpaket an jede IP Adresse gesendet.\\
+
+\subsection{Netzwerkadapter und ihre Subnetze}
+Um die Netzwerkinterfaces zu verwalten bietet Qt eine Klasse QNetworkInterface. Diese Klasse hat eine statische Methode, die alle Adapter ausgibt. Allerdings sind in der Liste auch Anschlüsse wie FireWire und Bluetooth enthalten. Diese Anschlüsse sowie Adapter die nicht mit einem Netzwerk verbunden sind, sollen aussortiert werden. Ausserdem beschränke ich die Auswahl auf IPv4 Adressen. Alle Interfaces mit einer IPv4 Adresse und einer Hardwareadresse (Mac) sollen vom Scanner verwendet werden.\\
+Um das Subnetz zu erfassen, werden die Ip Adresse und die Netmask benötigt. Beides kann mit Hilfe der Klasse QNetworkInterface abgefragt werden.
+Zu erst wird die kleinste Ip Adresse (Untergrenze) eines Subnetzes ermittelt. Durch eine bitweise Verknüpfung mit dem logischen UND, ergibt sich aus der Ip Adresse des Netzwerkinterfaces und der Netmask die Untergrenze.\\
+Für die größte Ip Adresse des Subnetzes (Obergrenze) brauche ich das Negativ der Netmask. Verknüpfe ich nun die negative Netmask und die Untergrenze mit dem logischem ODER, so erhalte ich die Obergrenze.\\
+In der Tabelle unten ist ein Beispiel angeführt. Für dieses Beispiel wurde die Ip Adresse „171.82.170.52“ und die Netmask „255.255.240.0“ verwendet.\\
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.8]{Bilder/IpRange.png}
+	\caption{Die Ober- und Untergrenze eines Subnetzes ermitteln.}
+\end{figure}
+Die grüne Markierung zeigt, das durch die logischen Operationen der Vordere Teil der IP Adresse sich nicht verändert. Genau wie es die Netmask vorgibt.\\
+Durch die rote Markierung wird demonstriert wie der hintere Teil der IP Adresse auf den höchsten Wert gesetzt wird.\\
+
+\subsection{Scan starten}
+Aus der Liste der Netzwerkadapter wird ein Adapter entnommen. Es wird die kleinste und die größte IP Adresse seines Subnetzes ermittelt. Danach wird der erste Community Name aus der Liste gewählt. Mit diesem Namen für die Community wird ein Paket für eine SNMP Anfrage an einen Agenten erzeugt. Das Paket wird an alle Adressen in der zuvor erhaltenen Reichweite des Subnetzes gesendet.\\
+
+\subsection{Senden an alle Adressen in Subnetz}
+Ein UDP Paket wird mit der Methode ‚writeDatagram()‘ aus der Klasse QUdpSocket versendet. Ist das erste Datenpaket fehlerfrei versandt, dann wird ein Timer gestartet. Der Timer löst in einem einstellbarem Interval ein Signal aus. Durch dieses Signal wird die Methode ‚timerEvent()‘ aufgerufen. Diese Methode inkriminiert die IP und sendet das nächste Paket an diese Adresse. Wenn die letzte IP-Adresse im Subnetz erreicht ist, dann wird der Timer gestoppt. An diesem Punkt sollte jeder Agent eine Anfrage erhalten haben. Doch um sicher zugehen, kann der Vorgang wiederholt werden und das gleiche Paket noch einmal an alle Adressen gesendet werden. Dazu wird das Signal ‚retry()‘ wird ausgelöst, wodurch die Methode ‚doRetry()‘ aufgerufen wird.\\
+\begin{figure}[h]
+	\centering
+	\includegraphics[scale=.6]{Bilder/InnererKreis.png}
+	\caption{Der Ablauf beim Versenden einzelner Pakete.}
+\end{figure}
+
+\subsection{Retries}
+Da UDP ein nicht zuverlässiges Protokoll ist, können Pakete im Netzwerk verloren gehen. Kommt von einer Adresse keine Antwort, ist nicht gewiss, dass dort kein Agent horcht. Aus diesem Grund müssen alle Adressen, von denen keine Antwort kam, noch einmal geprüft werden. Dazu kann die Anzahl der Versuche eingestellt werden, um einen Agent an einer IP mit einem Community Namen möglichst zuverlässig zu erreichen. Dafür wird der zuvor beschriebene Kreislauf mit der gewünschten Anzahl wiederholt. Bis alle Wiederholungen abgeschlossen sind, danach wird der Timer gestoppt und das Signal ‚changeSnmpCommunity()‘ ausgelöst. Daraufhin wird ein neues Datenpaket mit einem anderen Community Namen geschnürt.\\
+
+\subsection{Warum Wiederholungen auf alle Adressen}
+Um nicht erneut Pakete an alle Adressen zu senden gäbe es verschiedene Möglichkeiten. Es könnte zum Beispiel nach dem Senden eines Paketes auf eine Antwort gewartet werden. Um dann gleich nachdem keine kam das nächste Paket zu senden. Doch dafür wäre ein Timeout nötig. In einem einfachen kleinem Netzwerk sind meist 254 Adressen verfügbar. In so einem kleinen Netzwerk ist im Schnitt mit ca. fünf Treffern zu rechnen. Also müsste 249 malvergeblich auf eine Antwort gewartet werden. Beträgt der Timeout nur eine Sekunde, dann würde ein Scan für dieses Beispiel mit nur einem Community Namen mehr als 249 Sekunden dauern. Das sind gut vier Minuten und dauert damit viel zu lange.\\
+Alternativ könnte man eine Liste führen. Eine Liste mit all den IP Adressen, von denen ein Agent geantwortet hat. Dann könnte man diese Adressen beim nächsten Durchlauf ausschließen. Jede Adresse müsste dann mit dem Ergebnis aus dem ersten Durchlauf abgeglichen werden, bevor ein Paket dorthin versendet wird. Doch um fünf Adressen aus 254 auszuschließen halte ich für einen zu großen Overhead.\\
+Deshalb werden ohne vorherige Ergebnisse zu berücksichtigen erneut Pakete an alle Adressen gesendet. Die Selektion findet dann nach dem Scannen statt. Da die Ergebnismenge wesentlich kleiner ist als die Anzahl der Adressen in einem Subnetz, halte ich dieses Vorgehen für effektiver.\\
+
+\subsection{Community Namen}
+Auf vielen Geräten werden vom Hersteller bereits SNMP Agenten installiert. Mit der standard Konfiguration nutzen diese Agents die Community-Namen „public“ und „private“. Der Kunde kann diese jedoch beliebig ändern. Doch der Scanner sollte wenigstens die Gräte finden, die noch die standard Konfiguration verwenden. Dazu sollten wenigstens diese beiden Namen ausprobiert werden. Die Liste der Namen kann in der Konfiguration auf dem Server beliebig angelegt werden.\\
+Ist ein Scan mit allen Wiederholungen abgeschlossen und das Signal ‚changeSnmpCommunity()‘ ausgelöst, dann holt eine Methode den nächsten Community-Namen aus der Liste. Mit dem Community-Namen muss ein neues SNMP Paket gebaut werden. Das neue Paket wird auf die erste Adresse im Subnetz mit der Methode ‚writeDatagram()‘ gesendet. Der Timer wird gestartet, wodurch der Kreislauf erneut angestoßen wird.
+Wenn alle Community-Namen der Liste bereits verwendet wurden, wird das Signal ‚changeInterface()‘ ausgelöst.\\
+
+\subsection{Netzwerkadapter wechseln}
+Sind an einem Netzwerkadapter alle Community-Namen an allen Adressen mit sämtlichen Wiederholungen durch, wird ein anderer Adapter ausgewählt. Durch ein Signal wird die Methode ‚nextInterface()‘ aufgerufen, in der aus der Liste der Adapter der nächste heraus genommen wird. Für diesen Adapter wird der Adressraum bestimmt. Aus der Liste der Community-Namen wird der erste in der Liste gewählt. Mit diesem Namen wird ein neues Paket erzeugt. Das neue Paket wird mit der Methode ‚writeDatagram()‘ an die erste IP im Subnetz geschickt und der Timer gestartet. Damit beginnt der Zyklus in dem Subnetz dieses Adapters von neuem.\\
+Ist kein Netzwerkadapter mehr in der Liste, ist das Scannen abgeschlossen. Es wird ein Timer mit einer Sekunde gestartet um auf ausstehende Antworten zu warten. Danach wird der Scanner beendet und das Signal ‚scanFinished()‘ ausgelöst. Diesem Signal wird ein Zeiger auf das Ergebnis des Scans mit gegeben. Ein Empfänger dieses Signals kann das Ergebnis auswerten.\\
+
+\subsection{Fehlerbehandlung}
+Für die Fehlerbehandlung gibt es eine Membervariable vom Type ‚QString‘. Sie enthält eine Beschreibung des aufgetretenen Fehlers.\\
+\textbf{Beim Starten des Scanners}\\
+Wenn ein automatischer Scan gestartet wird, dann wird nach Netzwerkadaptern gesucht, die mit einem Subnetz über Ipv4 verbunden sind. Kann der 	Scanner keinen Netzwerkadapter mit Verbindung finden, dann endet die Methode und gibt ‚false‘ zurück. Die Membervariable wird mit dem 						Fehlertext „No online network interface available.“ belegt.\\
+\textbf{Beim Senden der UDP Pakete}\\
+Die Klasse ‚QUDPSocket‘ löst ein Signal aus, wenn ein Fehler auftritt. Dieses Signal wird abgefangen. Die Fehlermeldung wird erzeugt und in der 				Membervariablen gespeichert. Da das Scannen asynchron läuft, wird der Intervaltimer gestoppt und das Signal ‚reportError(QString)‘ ausgelöst.
 
 % -------------
-\pagebreak
+\newpage
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % Literaturverzeichnis
 % -----------------------------------------------------------------------------------------------------------------------------------------
@@ -566,6 +749,16 @@ Nachdem die ersten Entwürfe von SNMPv2 zu umständlich und kompliziert waren, f
 		ComConsult Research, Das Wissensportal, SNMP Version 2 und 3
 	\bibitem{rfcDiscoveryAgent}
 		RFC 1910, 4. Discovery, Seite 30
+	\bibitem{rfcSnmpv3EngineDispatcher}
+		RFC 3411,  3.1.1.2 Dispatcher, Seite 18
+	\bibitem{rfcSnmpv3EngineMPS}
+		Quelle: RFC 3411, 3.1.1.3, Message Processing Subsystem, Seite 19
+	\bibitem{rfcSnmpv3EngineSecurity}
+		RFC 3411, 3.1.1.4 Security Subsystem, Seite 20
+	\bibitem{rfcSnmpv3EngineACS}
+		RFC 3411, 3.1.2  Access Control Subsystem, Seite 21
+	\bibitem{rfcSnmpv3EngineMPS2}
+		RFC 3412, 3. Elements of Message Processing and Dispatching, Seite 6
 \end{thebibliography}
 
 \end{document}
