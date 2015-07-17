@@ -86,6 +86,7 @@ Es gibt verschiedene Protokolle mit denen Administratoren ihre Geräte im Netzwe
 Findet sich im Subnetz von einem Glimpse-Client ein Gateway-Router, der mit den Standardpasswörtern läuft, können die Statistiken ausgelesen werden.
 \pagebreak
 
+\part{Das SNMP Protokoll}
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % Geschichte
 % -----------------------------------------------------------------------------------------------------------------------------------------
@@ -255,7 +256,7 @@ Das Datum selbst wird byteweise eingetragen, wobei mit dem höchsten Byte begonn
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % Das SNMP Protokoll
 % -----------------------------------------------------------------------------------------------------------------------------------------
-\section{Das SNMP Protokoll}
+\section{Das Protokoll}
 SNMP steht für Simple Network Management Protocol. Es wurde entwickelt für die Kommunikation zwischen verschiedenen Geräten und einem NMS im Netzwerk.\\
 \emptyline
 Das mit diesem Protokoll angestrebte Ziel beschreiben die Entwickler wie folgt:\\
@@ -296,8 +297,7 @@ Das Paket unterteilt sich im im wesentlichen in zwei Teile. Der Header und die P
 	\includegraphics[scale=1]{Bilder/SNMPv1-Header.png}
 	\caption{Der Header von SNMP Version 1}
 \end{figure}
-Der Inhalt eine SNMP Nachricht besteht aus einer Ansammlung von Daten, einer Sequenz. Der Header beginnt deshalb mit dem ASN.1 Datentype „Sequence“. Die Länge entspricht dem gesamten Paket in Bytes. Der rest des Paketes entspricht dem Wert in diesem TLV-Encoding.
-Die Version die Version des Protokolls, die verwendet wird, ist vom Datentype INTEGER. Für die Länge ist hier nur ein Byte ausreichend. Die Versionsnummer sind fortlaufend durchnummeriert, beginnend bei 0 mit SNMPv1.\\
+Der Inhalt einer SNMP Nachricht besteht aus einer Ansammlung von Daten, einer Sequenz. Der Header beginnt deshalb mit dem ASN.1 Datentype „Sequence“. Die Länge entspricht dem gesamten Paket in Bytes. Der rest des Paketes entspricht dem Wert in diesem TLV-Encoding. Im Header wird immer die Version des Protokolls eingetragen, die man verwenden möchte. Um die Versionsnummer anzugeben benutzt man den Datentype INTEGER. Für die Länge ist hier ein Byte ausreichend. Die Versionsnummern sind fortlaufend durchnummeriert, beginnend bei 0 mit SNMPv1.\\
 Die Community dient hier der Sicherheit und ist als eine Art Passwort gedacht. Es gibt ein solches „Passwort“ jeweils fürs Auslesen von Daten und zum Editieren von Konfigurationen an den Geräten. Vom Hersteller werden meist „public“ zum lesen und „private“ zum schreiben voreingestellt. Als Datentype verwendet man üblicherweise OCTED STRING. Für jedes Zeichen wird ein Byte verwendet.\\
 
 \subsubsection{Protocol Data Unit (PDU)}
@@ -389,10 +389,10 @@ Im letzten Feld übermittelt der Agent die Zeit, die seit seinem letzten Neustar
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % SNMPv2
 % -----------------------------------------------------------------------------------------------------------------------------------------
-\subsection{SNMPv2 Allgemein}
-Es gibt mehrere Varianten von dieser SNMP Version. Die gängigste Varante aus der Version 2 des Protokolls is SNMPv2c Community Based. Ansonsten gab es noch SNMPsec, SNMPv2*, Party Based und User Based. „The Party-based SNMPv2 (SNMPv2p), SNMPv2u, and SNMPv2* were either declared Historic circa 1995 or were never on the standards track.“ \cite{rfcSnmpNotUsed}
+\section{SNMPv2 Allgemein}
+Es gibt mehrere Varianten von dieser SNMP Version. Die gängigste Varante aus der Version 2 des Protokolls is SNMPv2c Community Based. Ansonsten gab es noch SNMPsec, SNMPv2*, Party Based und User Based. Die meisten Varianten von SNMPv2 wurden jedoch nie oder nur kaum eingesetzt. Dies läst sich in einem RFC nachlesen. „The Party-based SNMPv2 (SNMPv2p), SNMPv2u, and SNMPv2* were either declared Historic circa 1995 or were never on the standards track.“ \cite{rfcSnmpNotUsed}
 \subsubsection{Sicherheit}
-In der Version 2 des Protokolls ging es haupsächlich um die Sicherheit. Der Community-Name als eine Art Passwort ist zu unsicher geworden. Die Konfiguration der Geräte im Netzwerk sollte nicht länger dem Schutz eines solchen Passwortes unterliegen. Deshalb haben die Entwickler sich folgende Ziele gesetzt:
+In der Version 2 des Protokolls ging es haupsächlich um die Sicherheit. Der Community-Name als eine Art Passwort ist zu unsicher geworden. Die Konfiguration der Geräte im Netzwerk sollte nicht länger dem Schutz eines so simplen Passwortes unterliegen. Deshalb haben die Entwickler sich folgende Ziele gesetzt:
 \begin{description}
 	\item["(1)]
 	The protocol should provide for verification that each received SNMPv2 message has not been modified during its transmission through the network 	in such a way that an unauthorized management operation might result.       
@@ -446,7 +446,7 @@ In diesem Modell von SNMP haben alle Agenten und Manager eine locale Datenbank, 
 \cite{snmpv2PartyBased}\\
 
 \subsection{SNMPv2p Protokollaufbau}
-Der Aufbau des Protokolls unterscheidet sich grundlegend von der Vorgängerversion. Hier wurde sehr viel Wert auf Sicherheit gelegt. Der Absender trägt im Feld ‚privDest‘ einen Object Identifier ein und legt sich selbst als Empfänger einer Antwort fest. Durch den Object Identifier kann der Empfänger den Sender identifizieren. Das Paket wird nur bearbeitet, wenn der Absender bekannt ist. Den Rest des Pakets trägt man als OKTET STRING im Feld ‚privData‘ ein. Dieser Teil der Nachricht kann verschlüsselt sein. Wenn die Nachricht verschlüsselt wird, dann muss in der MIB des Empfängers der Schlüssel zum decodieren und das angewandte Verschlüsselungsverfahren eingetragen sein. Zu finden ist beides mit den Object Identifier aus Feld ‚privDist‘. Beide Felder werden eingebetet in eine Sequence, sie gibt die Länge der gesamten Nachricht an.\\
+Der Aufbau des Protokolls unterscheidet sich grundlegend von der Vorgängerversion. Hier wurde sehr viel Wert auf Sicherheit gelegt. Der Absender trägt im Feld ‚privDest‘ einen Object Identifier ein und legt sich selbst als Empfänger einer Antwort fest. Durch den Object Identifier kann der Empfänger den Sender identifizieren. Das Paket wird nur bearbeitet, wenn der Absender bekannt ist. Den Rest des Pakets trägt man als OKTET STRING im Feld ‚privData‘ ein. Dieser Teil der Nachricht kann verschlüsselt sein. Wenn die Nachricht verschlüsselt wird, dann muss in der MIB des Empfängers der Schlüssel zum decodieren und das angewandte Verschlüsselungsverfahren eingetragen sein. Zu finden ist beides mit dem Object Identifier aus Feld ‚privDist‘. Beide Felder werden eingebetet in eine Sequence, sie gibt die Länge der gesamten Nachricht an.\\
 \begin{figure}[h]
 	\centering
 	\includegraphics[scale=1]{Bilder/SNMPv2p-Header-Encode}
@@ -657,12 +657,96 @@ Die PDU selbst unterscheidet sich nicht von der in SNMP Version 1.\\
 % -----------------------------------------------------------------------------------------------------------------------------------------
 % Measurement
 % -----------------------------------------------------------------------------------------------------------------------------------------
+\part{Measurement in Glimpse}
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Glimpse
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section{Die Anwendung}
+Eine Beschreibung der Anwendung.
+"Das Internet ist das größte verteilte System der Welt und über die Jahre zur zentralen Kommunikationsinfrastruktur für Wirtschaft und Gesellschaft geworden. Nicht verwunderlich also, dass Regierungen, Regulierer und Interessensver- bände diese kritische Infrastruktur besser verstehen und schützen wollen. Dabei ist die Erfassung und Überwachung des Zustands des Internets extrem aufwändig, denn selbst einzelne Netzbetreiber können den Zustand des gesam- ten Internets nicht messen. Es bedarf vieler Messstellen, die sich regelmäßig Pakete schicken, um anschließend Schlüsse aus diesem Messverkehr zu ziehen. Insbesonde- re braucht es Endgeräte als Messstellen, um wirklich alle Netzsegemente zu erfassen. Dazu zählen die Zugangsnetz, wie z.B. DSL oder Kabelnetze, aber auch die Kernnetze großer Netzbetreiber und die Netze von Rechenzentren, aus denen die Dienste des Internets bereitgestellt werden. Kurz gesagt, man benötigt eine Community – eine Gruppe von Menschen, die sich bereit erklären, bei diesen Mes- sungen mitzuhelfen.\\
+Das GLIMPSE-Projekt der Hochschule Augsburg hat hierzu eine plattformübergreifende App entwickelt,
+die verschiedene Messverfahren implementiert. Dazu zählen z.B. das bekannte Traceroute-Verfahren oder
+ein Speedtest-Verfahren und andere. Nutzer der App können diese Verfahren selbst ausführen, um z. B. den eigenen Netzanschluss zu vermessen. Zusätzlich spenden Nutzer 20 Megabyte Datenvolumen jeden Monat, damit das GLIMPSE-Projekt eigene Messungen vornehmen kann."
+\cite{glimpseDescription}\\
+Glimpse wurde geschrieben in C++ mit dem Qt Framework.
+"Qt [..] ist eine C++-Klassenbibliothek für die plattformübergreifende Programmierung grafischer Benutzeroberflächen. Außerdem bietet Qt umfangreiche Funktionen zur Internationalisierung sowie Datenbankfunktionen und XML-Unterstützung an und ist für eine große Zahl an Betriebssystemen bzw. Grafikplattformen, wie X11 (Unix-Derivate), Mac OS X, Windows, iOS und Android erhältlich. Qt wird insbesondere in den Bibliotheken der KDE Software Compilation 4 verwendet, welche gleichzeitig das prominenteste Vorzeigebeispiel der Klassenbibliothek darstellt.\\ 
+\[...\]
+\\
+Qt verwendet einen Präprozessor, genannt MOC (meta object compiler), womit C++ um Fähigkeiten bereichert wird, die im Sprachstandard nicht enthalten sind, beispielsweise Signale und Slots sowie Introspektion. Der so erzeugte Code folgt dem C++-Standard, so dass er mit handelsüblichen Compilern übersetzt werden kann."
+\cite{qtDescritionWikiPedia}\\
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Anforderungen
+% -----------------------------------------------------------------------------------------------------------------------------------------
+\section{Die Anforderungen an die Anwendung}
+\textbf{Allgemein}
+\begin{itemize}
+\item die Probe soll plattformunabhängig sein.
+\item es gibt feste Optionen für zeitgesteuerte Messungen
+\item in der grafischen Oberfläche können verschiedene Einstellungen getätigt werden
+\item die Probe wird in regelmässigen Abständen ausgeführt
+\item der Benutzer soll auf seinem Smartphone die Probe selber starten können
+\item die Probe macht ihre Tests unabhängig davon, ob ein Subnetz schon einmal durchsucht wurde
+\end{itemize}
+%\emptyline
+
+\textbf{Durch grafische Oberfläche (einzelner Test mit speziellen Einstellungen)}
+\begin{itemize}
+\item einen Modus auswählen (ganzes Subnetz scannen, IP-Bereich scannen oder mit einem Gerät interagieren)
+\item auswählbares Zeitinterval, in dem vom Scanner die UDP-Pakete gesendet werden.
+\item eine Zeitspanne, in der nach dem versenden der UDP-Pakete auf Antwroten gewartet wird.
+\item die Anzahl wie oft ein Paket an einen Empfänger gesendet wird, um einem möglichen Paketverlust entgegen zu wirken
+\item eine bestimmte Ip Adresse (oder eine Liste mit Adressen).
+\item einen Ip-Bereich zum Scannen auswählen
+\item Community String Liste
+\item ein Managed Object über dessen Object Identifier auslesen
+\item Veränderungen an einem Managed Object eines Gerätes vornehmen
+\item soll mehrere Versionen des Protokolls unterstützen
+\end{itemize}
+%\emptyline
+
+\textbf{Zum Scannen}
+\begin{itemize}
+\item Interfaces die online sind finden.
+\item die Netmask des Interfaces auslesen.
+\item den Ip Bereich des Subnetzes errechnen
+\item den Community String
+\item einen Wert anfragen z.B. sysDescr.0 an allen IP Adressen
+\end{itemize}
+%\emptyline
+
+\textbf{Wenn Geräte gefunden wurden}
+\begin{itemize}
+\item Geräte unterscheiden in Router, Switch, Printer ...
+\item Gateway finden
+\item gesammelte Werte für die Datenbank formatieren
+\end{itemize}
+\emptyline
+
+\textbf{Standard Einstellungen für automatischen Scan}
+\begin{itemize}
+\item Community Liste
+\item Anzahl der Versuche auf jeder IP
+\item Time out für Scanner (Wartezeit nach dem versenden der Pakete)
+\item Zeitintervall in dem die Pakete versendet werden
+\item ein Managed Object für den Request
+\end{itemize}
+\emptyline
+
+\textbf{Gateway - Statistiken}
+\begin{itemize}
+\item vor und nach einem Bandbreitentest die Statistik des Gatewayrouters auslesen
+\end{itemize}
+
+% -----------------------------------------------------------------------------------------------------------------------------------------
+% Scanner
+% -----------------------------------------------------------------------------------------------------------------------------------------
 \section{SNMP Scanner}
 \subsection{Vorgehensweise}
-Die beste Methode alle SNMP-fähigen Geräte zu finden, wäre ein Portscan. Um in einem Subnetz nach Geräten zu suchen, die den Port 161 offen haben, müsste man ICMP-Nachrichten verschicken. Am besten such man zunächst nach allen Geräten im Netzwerk und sendet anschließend an jedes Gerät ein UPD Paket auf Port 161. Aus den ICMP Antworten kann sehr genau abgeleitet werden, an welcher Adresse ein SNMP Agent sitzt. Ein SNMP Agent würde eine Nachricht nur beantworten, wenn es ein korrektes SNMP Paket ist. Zum versenden von ICMP-Nachrichten sind administrative Rechte nötig. Die Anwendung verfügt jedoch nur über normale Benutzerrechte. Aus diesem Grund versendet der Scanner SNMP-Nachrichten und sammelt die Antworten.\\
+Die beste Methode alle SNMP-fähigen Geräte zu finden, wäre ein Portscan. Um in einem Subnetz nach Geräten zu suchen, die den Port 161 offen haben, müsste man ICMP-Nachrichten verschicken oder zumindest empfangen können. Am besten such man zunächst nach allen Geräten im Netzwerk und sendet anschließend an jedes Gerät ein UPD Paket auf Port 161. Aus den ICMP Antworten kann sehr genau abgeleitet werden, an welcher Adresse ein SNMP Agent sitzt. Ein SNMP Agent würde eine Nachricht nur beantworten, wenn es ein korrektes SNMP Paket ist. Zum versenden von ICMP-Nachrichten sind administrative Rechte nötig. Die Anwendung verfügt jedoch nur über normale Benutzerrechte. Aus diesem Grund versendet der Scanner SNMP-Nachrichten und sammelt die Antworten.\\
 Einige Versionen des Protokolls haben Sicherheitsmechanismen, die mir das Aufspüren dieser Geräte unmöglich machen. Ohne die Sicherheitsmechanismen zu hintergehen, kann ich nur Gräte finden, die mit den Versionen 1 und 2 Community-Based arbeiten.\\
 Der Scanner kann auf zwei verschiedene Arten eingesetzt werden. Es kann ein automatischer Scan ausgelöst werden. Oder er kann vom Benutzer über die graphische Oberfläche gestartet werden.\\
-Für den Scanner wird als Basisklasse ein QUdpSocket verwendet. Sehr viele SNMP Agenten arbeiten mit der Version 2c. Um dem Protokoll gerecht zu werden, reicht ein UDP Paket an dem Agent.\\
+Für den Scanner wird als Basisklasse ein QUdpSocket verwendet. Sehr viele SNMP Agenten arbeiten mit der Version 2c. Um dem Protokoll gerecht zu werden, reicht ein UDP Paket an den Agent.\\
 
 \subsection{Der automatische Scan}
 Der Scanner muss zunächst konfiguriert werden. Er benötigt eine Liste an Community Namen und die zu verwendende Version des Protokolls, die im Paket an den Agent eingetragen werden. Weil UDP kein zuverlässiges Protokoll ist, kann außerdem ausgewählt werden, wie oft ein Paket an den Empfänger gesendet werden soll. Diese Werte zur Konfiguration kommen von einem Server und werden vor dem Start des Scanners von der ‚prepare()‘ Methode gesetzt.\\
@@ -759,6 +843,13 @@ Die Klasse ‚QUDPSocket‘ löst ein Signal aus, wenn ein Fehler auftritt. Dies
 		RFC 3411, 3.1.2  Access Control Subsystem, Seite 21
 	\bibitem{rfcSnmpv3EngineMPS2}
 		RFC 3412, 3. Elements of Message Processing and Dispatching, Seite 6
+	\bibitem{glimpseDescription}
+		Forschungsbericht 2014 der Hochschule Augsburg,
+		Dr. Prof. Rolf Winter,
+		Community-Start GLIMPSE,
+		Seite 69
+	\bibitem{qtDescritionWikiPedia}
+		Qt (Bibliothek), Wikipedia, https://de.wikipedia.org/wiki/Qt\_(Bibliothek), Juli 2015
 \end{thebibliography}
 
 \end{document}
